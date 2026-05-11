@@ -24,6 +24,7 @@
             <button class="nav-btn" data-view="agenda"><i class="ph ph-calendar-blank"></i> Agenda</button>
             <button class="nav-btn" data-view="clientes"><i class="ph ph-users"></i> Clientes</button>
             <button class="nav-btn" data-view="servicos"><i class="ph ph-list-dashes"></i> Serviços</button>
+            <button class="nav-btn" data-view="config"><i class="ph ph-gear"></i> Configurações</button>
         </nav>
     </div>
 
@@ -148,7 +149,8 @@
             </header>
 
             <div id="modal-servico" class="card hidden" style="margin-bottom: 24px; border: 1px solid var(--primary-color);">
-                <h3 style="margin-bottom: 20px;">Cadastrar Serviço</h3>
+                <h3 style="margin-bottom: 20px;">Cadastrar/Editar Serviço</h3>
+                <input type="hidden" id="servico-id">
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Nome do Serviço</label>
@@ -171,12 +173,46 @@
                         <tr>
                             <th>Serviço</th>
                             <th>Valor (R$)</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="servicos-tbody">
                         <!-- JS injects here -->
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <!-- Configurações -->
+        <section id="view-config" class="view-section">
+            <header class="section-header">
+                <h2>Configurações de Recompensas</h2>
+                <button class="btn-primary" id="btn-save-config"><i class="ph ph-floppy-disk"></i> Salvar</button>
+            </header>
+            <div class="card">
+                <h3 style="margin-bottom: 20px;">Cupom 1</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Percentual de Desconto (%)</label>
+                        <input type="number" id="config-cupom1-perc" value="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Custo em Pontos</label>
+                        <input type="number" id="config-cupom1-pts" value="50">
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 20px; margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">Cupom 2</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Percentual de Desconto (%)</label>
+                        <input type="number" id="config-cupom2-perc" value="20">
+                    </div>
+                    <div class="input-group">
+                        <label>Custo em Pontos</label>
+                        <input type="number" id="config-cupom2-pts" value="100">
+                    </div>
+                </div>
             </div>
         </section>
 

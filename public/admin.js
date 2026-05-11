@@ -21,9 +21,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-cancel-cliente').addEventListener('click', () => document.getElementById('modal-cliente').classList.add('hidden'));
     document.getElementById('btn-save-cliente').addEventListener('click', saveCliente);
 
-    document.getElementById('btn-add-servico').addEventListener('click', () => document.getElementById('modal-servico').classList.remove('hidden'));
+    document.getElementById('btn-add-servico').addEventListener('click', () => {
+        document.getElementById('servico-id').value = '';
+        document.getElementById('servico-nome').value = '';
+        document.getElementById('servico-valor').value = '';
+        document.getElementById('modal-servico').classList.remove('hidden');
+    });
     document.getElementById('btn-cancel-servico').addEventListener('click', () => document.getElementById('modal-servico').classList.add('hidden'));
     document.getElementById('btn-save-servico').addEventListener('click', saveServico);
+
+    document.getElementById('btn-save-config').addEventListener('click', saveConfig);
 
     document.getElementById('btn-add-agenda').addEventListener('click', () => {
         document.getElementById('modal-agenda').classList.remove('hidden');
@@ -56,8 +63,44 @@ function initNavigation() {
             if (viewId === 'view-servicos') loadServicos();
             if (viewId === 'view-agenda') loadAgenda();
             if (viewId === 'view-dashboard') loadDashboard();
+            if (viewId === 'view-config') loadConfig();
         });
     });
+}
+
+// --- Configurações ---
+async function loadConfig() {
+    try {
+        const doc = await db.collection("configuracoes").doc("recompensas").get();
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('config-cupom1-perc').value = data.cupom1.percentual;
+            document.getElementById('config-cupom1-pts').value = data.cupom1.pontos;
+            document.getElementById('config-cupom2-perc').value = data.cupom2.percentual;
+            document.getElementById('config-cupom2-pts').value = data.cupom2.pontos;
+        }
+    } catch(e) {
+        console.error("Erro ao carregar configurações", e);
+    }
+}
+
+async function saveConfig() {
+    const data = {
+        cupom1: {
+            percentual: parseInt(document.getElementById('config-cupom1-perc').value),
+            pontos: parseInt(document.getElementById('config-cupom1-pts').value)
+        },
+        cupom2: {
+            percentual: parseInt(document.getElementById('config-cupom2-perc').value),
+            pontos: parseInt(document.getElementById('config-cupom2-pts').value)
+        }
+    };
+    try {
+        await db.collection("configuracoes").doc("recompensas").set(data);
+        alert("Configurações salvas com sucesso!");
+    } catch(e) {
+        alert("Erro ao salvar configurações.");
+    }
 }
 
 // --- Dashboard ---
@@ -140,20 +183,36 @@ async function loadServicos() {
         tr.innerHTML = `
             <td>${s.nome}</td>
             <td>R$ ${Number(s.valorPadrao).toFixed(2)}</td>
+            <td>
+                <button onclick="editServico('${doc.id}', '${s.nome}', ${s.valorPadrao})" class="action-btn" title="Editar"><i class="ph ph-pencil-simple" style="color: var(--text-primary);"></i></button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
+function editServico(id, nome, valorPadrao) {
+    document.getElementById('servico-id').value = id;
+    document.getElementById('servico-nome').value = nome;
+    document.getElementById('servico-valor').value = valorPadrao;
+    document.getElementById('modal-servico').classList.remove('hidden');
+}
+
 async function saveServico() {
+    const id = document.getElementById('servico-id').value;
     const nome = document.getElementById('servico-nome').value;
     const valorPadrao = parseFloat(document.getElementById('servico-valor').value);
     if (!nome || isNaN(valorPadrao)) return alert('Preencha os campos corretamente');
 
     try {
-        await db.collection("servicos").add({ nome, valorPadrao });
+        if (id) {
+            await db.collection("servicos").doc(id).update({ nome, valorPadrao });
+        } else {
+            await db.collection("servicos").add({ nome, valorPadrao });
+        }
         
         document.getElementById('modal-servico').classList.add('hidden');
+        document.getElementById('servico-id').value = '';
         document.getElementById('servico-nome').value = '';
         document.getElementById('servico-valor').value = '';
         loadServicos();

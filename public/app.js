@@ -51,6 +51,7 @@ async function login(clienteId, nome) {
             currentUser = { id: docRef.id, ...docRef.data() };
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('portal-section').style.display = 'block';
+            await carregarConfiguracoes();
             atualizarPainelCliente();
         }
     } catch (e) {
@@ -152,9 +153,40 @@ async function atualizarPainelCliente() {
     }
 }
 
-async function resgatarCupom(desconto) {
+let configCache = {
+    cupom1: { percentual: 10, pontos: 50 },
+    cupom2: { percentual: 20, pontos: 100 }
+};
+
+async function carregarConfiguracoes() {
+    try {
+        const doc = await db.collection("configuracoes").doc("recompensas").get();
+        if (doc.exists) {
+            configCache = doc.data();
+        }
+        
+        const container = document.getElementById('rewards-container');
+        container.innerHTML = `
+            <div class="reward-card">
+                <i class="ph-duotone ph-ticket" style="font-size: 40px; color: var(--primary-color);"></i>
+                <h3>${configCache.cupom1.percentual}% OFF</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">Em qualquer procedimento</p>
+                <button class="btn-primary w-100" onclick="resgatarCupom(${configCache.cupom1.percentual}, ${configCache.cupom1.pontos})" style="width: 100%; justify-content: center;">Resgatar por ${configCache.cupom1.pontos} pts</button>
+            </div>
+            <div class="reward-card">
+                <i class="ph-duotone ph-ticket" style="font-size: 40px; color: var(--primary-color);"></i>
+                <h3>${configCache.cupom2.percentual}% OFF</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">Em qualquer procedimento</p>
+                <button class="btn-primary w-100" onclick="resgatarCupom(${configCache.cupom2.percentual}, ${configCache.cupom2.pontos})" style="width: 100%; justify-content: center;">Resgatar por ${configCache.cupom2.pontos} pts</button>
+            </div>
+        `;
+    } catch(e) {
+        console.error("Erro ao carregar recompensas", e);
+    }
+}
+
+async function resgatarCupom(desconto, custo) {
     if (!currentUser) return;
-    const custo = desconto === 20 ? 100 : 50;
     
     if (currentUser.pontos < custo) {
         alert(`Você precisa de ${custo} pontos para resgatar este cupom.`);
