@@ -27,7 +27,7 @@ body {
     color: var(--text-primary);
     display: flex;
     height: 100vh;
-    overflow: hidden;
+    overflow-y: auto;
     font-size: 15px;
 }
 
